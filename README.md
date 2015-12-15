@@ -1,0 +1,1 @@
+Bridge between Spring framework and Quartz clustering.
