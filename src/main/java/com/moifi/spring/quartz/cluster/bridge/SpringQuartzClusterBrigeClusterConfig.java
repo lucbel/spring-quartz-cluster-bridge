@@ -12,6 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 
 /**
@@ -33,6 +34,13 @@ public class SpringQuartzClusterBrigeClusterConfig {
 
     @Autowired
     PropertyUtil propertyUtil;
+
+    private final static String DRIVER_DELEGATE_CLASS = "org.quartz.jobStore.driverDelegateClass";
+    private final static String TABLE_PREFIX = "org.quartz.jobStore.tablePrefix";
+    private final static String MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
+    private final static String CLUSTER_CHECK_INTERVAL = "org.quartz.jobStore.clusterCheckInterval";
+    private final static String INSTANCE_NAME = "org.quartz.scheduler.instanceName";
+    private final static String INSTANCE_ID = "org.quartz.scheduler.instanceId";
 
 
     @Bean(destroyMethod = "shutdown")
@@ -59,6 +67,28 @@ public class SpringQuartzClusterBrigeClusterConfig {
     @Bean
     Scheduler scheduler(){
 return null;
+    }
+
+    @Bean
+    Properties quartzProperties(){
+        Properties properties =  new Properties();
+
+        addProperty(properties,INSTANCE_NAME,"MyClusteredScheduler");
+        addProperty(properties,INSTANCE_ID,"AUTO");
+        addProperty(properties,DRIVER_DELEGATE_CLASS,"org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+        addProperty(properties,TABLE_PREFIX,"QRTZ_");
+        addProperty(properties,MISFIRE_THRESHOLD,"60000");
+        addProperty(properties,CLUSTER_CHECK_INTERVAL,"15000");
+        properties.setProperty("org.quartz.jobStore.isClustered","true");
+
+        return properties;
+    }
+
+
+    private void addProperty(Properties properties,String key,String defaultValue){
+        Optional<String> optional = Optional.of(environment.getProperty(key));
+        optional.orElse(defaultValue);
+        properties.setProperty(key,optional.get());
     }
 
 

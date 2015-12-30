@@ -16,14 +16,21 @@ public class PropertyUtil {
 
 
     public Integer getInteger(PropertyResolver propertyResolver, String key) throws ValidationException{
-        String property = propertyResolver.getProperty(key);
-        if(property != null){
-            if(property.matches("[^0-9]")){
-                throw new ValidationException("The property with key " + key + " it should be a number.");
+            String property = propertyResolver.getProperty(key);
+            if (property != null) {
+                // Not contains a non-numeric character
+                if (property.matches("^[0-9]")) {
+                    throw new ValidationException("The property with key " + key + " it should be a number.");
+                }
+                try{
+                    return new Integer(property);
+                } catch (NumberFormatException e){
+                    throw new ValidationException("The property has and invalid format, it should be an integer",e);
+                }
+            } else {
+                throw new ValidationException("The key cannot be null");
             }
-            return new Integer(property);
-        }
-        return 0;
+
     }
 
 }
